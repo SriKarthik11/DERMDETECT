@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: dermdetect
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app --timeout 120 --workers 1 --max-requests 100 --preload
+    envVars:
+      - key: SUPABASE_URL
+        value: https://kmlpgfpkjwbijbynfrox.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttbHBnZnBrandiaWpieW5mcm94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzczMTksImV4cCI6MjA3NDA1MzMxOX0.MQ8FGaMf97QWARVVFQt7BCQdoUtBkKFsUQ3zrdEBp78

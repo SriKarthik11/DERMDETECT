@@ -41,12 +41,23 @@ CLASS_NAMES = [
 
 # Load model
 def load_model():
-    model = timm.create_model("tiny_vit_21m_224", pretrained=False, num_classes=len(CLASS_NAMES))
-    state_dict = torch.load(MODEL_PATH, map_location=DEVICE, weights_only=True)
-    model.load_state_dict(state_dict)
-    model.to(DEVICE)
-    model.eval()
-    return model
+    try:
+        print("Loading TinyViT model...")
+        model = timm.create_model("tiny_vit_21m_224", pretrained=False, num_classes=len(CLASS_NAMES))
+        print("Model architecture created")
+        
+        print("Loading model weights...")
+        state_dict = torch.load(MODEL_PATH, map_location=DEVICE, weights_only=True)
+        model.load_state_dict(state_dict)
+        print("Weights loaded successfully")
+        
+        model.to(DEVICE)
+        model.eval()
+        print("Model ready for inference")
+        return model
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        raise e
 
 # Image preprocessing
 transform = transforms.Compose([
@@ -55,17 +66,22 @@ transform = transforms.Compose([
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
-# Initialize model and Supabase
-model = load_model()
-print("✅ Model loaded successfully")
-
-# Initialize Supabase (optional - will work without Supabase too)
+# Initialize Supabase first (lighter operation)
 try:
     supabase_db = SupabaseDB()
     print("✅ Supabase initialized")
 except Exception as e:
     print(f"⚠️ Supabase not available: {e}")
     supabase_db = None
+
+# Initialize model (heavier operation)
+print("🤖 Starting model initialization...")
+model = load_model()
+print("✅ Model loaded successfully")
+
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'healthy', 'model_loaded': model is not None})
 
 @app.route('/')
 def index():
